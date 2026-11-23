@@ -10,9 +10,11 @@ export async function requireAdmin(req: Request) {
   const h = req.headers.get('authorization') || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
   if (!token) throw new HttpError(401, 'Not signed in');
+  let a;
+  try { a = adminAuth(); } catch (e) { throw new HttpError(500, `Server not configured: ${(e as Error).message}`); }
   let decoded;
   try {
-    decoded = await adminAuth().verifyIdToken(token);
+    decoded = await a.verifyIdToken(token);
   } catch {
     throw new HttpError(401, 'Session expired. Sign in again.');
   }
