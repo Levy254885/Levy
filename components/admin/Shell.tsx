@@ -61,8 +61,12 @@ export default function Shell({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [status, setStatus] = useState<'checking' | 'ok' | 'denied'>('checking');
   const [dark, setDark] = useState(false);
+  const [fatal, setFatal] = useState('');
 
-  useEffect(() => onAuthStateChanged(auth(), (u) => { setUser(u); setStatus('checking'); }), []);
+  useEffect(() => {
+    try { return onAuthStateChanged(auth(), (u) => { setUser(u); setStatus('checking'); }, (e) => setFatal(e.message)); }
+    catch (e) { setFatal((e as Error).message); setUser(null); }
+  }, []);
   useEffect(() => { setDark(document.documentElement.dataset.theme === 'dark'); }, []);
 
   useEffect(() => {
@@ -77,11 +81,14 @@ export default function Shell({ children }: { children: ReactNode }) {
           try { localStorage.setItem('noTrack', '1'); } catch { /* ignore */ }
           setStatus('ok');
           fetch('/api/admin/seed', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
-        } else {
+        } else if (r.status === 401 || r.status === 403) {
           await signOut(auth());
           setStatus('denied');
+        } else {
+          const d = await r.json().catch(() => ({} as { error?: string }));
+          setFatal(d.error || `Server error (${r.status}). Check the environment variables on the server.`);
         }
-      } catch { if (live) setStatus('denied'); }
+      } catch (e) { if (live) setFatal((e as Error).message || 'Could not reach the server.'); }
     })();
     return () => { live = false; };
   }, [user]);
@@ -102,6 +109,13 @@ export default function Shell({ children }: { children: ReactNode }) {
 
   const ctx = useMemo(() => ({ api, email: user?.email ?? '' }), [api, user]);
 
+  if (fatal) return (
+    <div className="login"><div className="card" style={{ maxWidth: 460 }}>
+      <h1 style={{ fontSize: 20, marginBottom: 10 }}>Admin can&apos;t start</h1>
+      <div className="flash error">{fatal}</div>
+      <p className="hint">Check that every variable from <code>.env.example</code> is set (locally in <code>.env.local</code>, on Vercel under Environment Variables), then restart or redeploy. Also add your domain under Firebase Authentication &gt; Settings &gt; Authorized domains.</p>
+    </div></div>
+  );
   if (user === undefined) return <div className="login"><p className="hint">Loading…</p></div>;
   if (!user) return <Login denied={status === 'denied'} />;
   if (status !== 'ok') return <div className="login"><p className="hint">{status === 'denied' ? 'Not allowed.' : 'Checking access…'}</p></div>;
