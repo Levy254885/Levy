@@ -1,4 +1,3 @@
-
 :root{
   --bg:#f7f8fc; --surface:#ffffff; --ink:#0a0f1c; --muted:#686d78;
   --blue:#2f8bff; --blue-2:#52a3ff; --btxt:#2b6fd6; --tint:#e8f2ff; --line:#e3eaf6;
@@ -220,14 +219,16 @@ section{padding-top:44px}
   .ctas{margin-top:36px;padding-bottom:0;gap:28px}
   .resume{height:64px;font-size:18px}.resume em{width:64px}.resume span{padding:0 28px}
 
-  .banner{height:300px;margin-top:40px;border-radius:36px}
-  .banner .sig{font-size:60px;left:52px;top:56px}
-  .banner svg.line{left:54px;top:150px;width:300px}
-  .banner img{right:6%;height:112%}
-  .socials{position:absolute;right:48px;margin:0;top:0}
-  .banner-wrap{position:relative}
-  .socials{grid-template-columns:repeat(3,150px);gap:14px;right:calc(48px + 40px);top:auto;bottom:-34px}
-  .socials a{padding:18px 10px}
+  .banner-wrap{margin-top:56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;padding:34px 40px;border-radius:36px;background:linear-gradient(135deg,#d7e7ff,#b8d4ff);box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+  [data-theme="dark"] .banner-wrap{background:linear-gradient(135deg,#142a52,#0e1f40)}
+  .banner-wrap:before{content:"";position:absolute;right:-90px;top:-120px;width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.3)}
+  [data-theme="dark"] .banner-wrap:before{background:rgba(47,139,255,.12)}
+  .banner{height:90px;margin:0;border-radius:0;background:none!important;box-shadow:none;overflow:visible}
+  .banner:before,.banner img{display:none}
+  .banner .sig{font-size:56px;left:0;top:0;max-width:none;white-space:nowrap;position:relative;transform:rotate(-3deg)}
+  .banner svg.line{left:4px;top:62px;width:260px}
+  .socials{position:relative;margin:0;grid-template-columns:repeat(3,150px);gap:14px;z-index:2}
+  .socials a{padding:16px 10px;box-shadow:0 10px 24px rgba(30,60,120,.12)}
 
   section{padding-top:84px}
   .duo{display:grid;grid-template-columns:1fr 1fr;gap:72px;padding-top:30px}
@@ -235,11 +236,14 @@ section{padding-top:44px}
   .h2{font-size:26px}.h2s{font-size:22px}
   .p{font-size:16.5px;line-height:28px;max-width:560px}
   .p.sm{font-size:15.5px}
-  .plist{gap:24px;margin-top:24px}
-  .pcard{padding:22px 22px;min-height:200px;gap:22px}
-  .pcard h3{font-size:19px}.pcard p{font-size:14px;line-height:23px}
-  .pcard small{font-size:11.5px}.pcard a.more{font-size:14px}
-  .pcard .shot{width:150px;height:150px;border-radius:20px}
+  .chips{gap:12px}.chip{height:48px;font-size:16px;padding:0 18px 0 15px;border-radius:16px}.chip svg{width:20px;height:20px}
+  .plist{grid-template-columns:repeat(3,1fr);gap:24px;margin-top:24px}
+  .pcard{flex-direction:column-reverse;align-items:stretch;gap:20px;padding:16px 16px 24px;min-height:0;border-radius:28px}
+  .pcard .shot{width:100%;height:210px;border-radius:20px}
+  .pcard .txt{padding:0 8px}
+  .pcard h3{font-size:20px}.pcard p{font-size:14px;line-height:23px}
+  .pcard small{font-size:11.5px}.pcard a.more{font-size:14px;margin-top:12px}
+  .pcard:not(:has(.shot img)) .shot.mono{height:210px}
   .seg{max-width:380px;margin-top:26px}
   .split{display:grid;grid-template-columns:340px 1fr;gap:72px;align-items:start}
   .split-head{position:sticky;top:110px}
