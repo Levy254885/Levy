@@ -31,7 +31,23 @@ function Login({ denied }: { denied: boolean }) {
     e.preventDefault();
     setBusy(true); setError(''); setInfo('');
     try { await signInWithEmailAndPassword(auth(), email.trim(), password); }
-    catch { setError('Wrong email or password.'); }
+    catch (x) {
+      const code = (x as { code?: string }).code || '';
+      const msg: Record<string, string> = {
+        'auth/invalid-credential': 'Wrong email or password.',
+        'auth/wrong-password': 'Wrong email or password.',
+        'auth/user-not-found': 'Wrong email or password.',
+        'auth/invalid-email': 'That email address is not valid.',
+        'auth/too-many-requests': 'Too many attempts. Wait a few minutes and try again.',
+        'auth/network-request-failed': 'Network error reaching Firebase. Check your connection or any ad blocker / VPN.',
+        'auth/unauthorized-domain': 'This domain is not authorized. Add it in Firebase Authentication > Settings > Authorized domains.',
+        'auth/invalid-api-key': 'Firebase API key is missing or wrong (NEXT_PUBLIC_FIREBASE_API_KEY).',
+        'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Firebase API key is not valid (NEXT_PUBLIC_FIREBASE_API_KEY).',
+        'auth/operation-not-allowed': 'Email/Password sign-in is not enabled in Firebase Authentication.',
+        'auth/internal-error': 'Firebase rejected the request. Check the API key restrictions (HTTP referrers) in Google Cloud.',
+      };
+      setError(`${msg[code] || 'Could not sign in.'}${code && !msg[code] ? ` (${code})` : ''}`);
+    }
     finally { setBusy(false); }
   }
   async function reset() {
