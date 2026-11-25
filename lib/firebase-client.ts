@@ -1,9 +1,13 @@
 'use client';
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { browserLocalPersistence, browserSessionPersistence, getAuth, initializeAuth, type Auth } from 'firebase/auth';
+
+let cached: Auth | null = null;
 
 // Only used for admin sign-in. All data access goes through the server API, and Firestore rules deny direct client access.
-export function auth() {
+// Persistence uses localStorage/sessionStorage (not IndexedDB), which avoids desktop browsers hanging on a blocked or locked IndexedDB.
+export function auth(): Auth {
+  if (cached) return cached;
   const app = getApps().length
     ? getApp()
     : initializeApp({
@@ -12,5 +16,10 @@ export function auth() {
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
         appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
       });
-  return getAuth(app);
+  try {
+    cached = initializeAuth(app, { persistence: [browserLocalPersistence, browserSessionPersistence] });
+  } catch {
+    cached = getAuth(app);
+  }
+  return cached;
 }
