@@ -5,7 +5,7 @@ import crypto from 'crypto';
 export const cfg = () => {
   const e = process.env;
   let cloud = (e.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || e.CLOUDINARY_CLOUD_NAME || '').trim();
-  let key = (e.CLOUDINARY_API_KEY || '').trim();
+  let key = (e.CLOUDINARY_API_KEY || e.NEXT_PUBLIC_CLOUDINARY_API_KEY || '').trim();
   let secret = (e.CLOUDINARY_API_SECRET || '').trim();
   const m = /^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/.exec((e.CLOUDINARY_URL || '').trim());
   if (m) { key = key || m[1]; secret = secret || m[2]; cloud = cloud || m[3]; }
