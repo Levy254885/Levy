@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase-client';
 
@@ -63,9 +63,15 @@ export default function Shell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);
   const [fatal, setFatal] = useState('');
 
+  const resolved = useRef(false);
   useEffect(() => {
-    try { return onAuthStateChanged(auth(), (u) => { setUser(u); setStatus('checking'); }, (e) => setFatal(e.message)); }
-    catch (e) { setFatal((e as Error).message); setUser(null); }
+    const t = setTimeout(() => {
+      if (!resolved.current) setFatal('The sign-in service did not respond. Check the NEXT_PUBLIC_FIREBASE_* variables, add this domain under Firebase Authentication > Settings > Authorized domains, and make sure no browser extension or firewall blocks googleapis.com.');
+    }, 8000);
+    try {
+      const off = onAuthStateChanged(auth(), (u) => { resolved.current = true; clearTimeout(t); setUser(u); setStatus('checking'); }, (e) => { resolved.current = true; setFatal(e.message); });
+      return () => { clearTimeout(t); off(); };
+    } catch (e) { clearTimeout(t); setFatal((e as Error).message); setUser(null); }
   }, []);
   useEffect(() => { setDark(document.documentElement.dataset.theme === 'dark'); }, []);
 
