@@ -1,11 +1,16 @@
 import 'server-only';
 import crypto from 'crypto';
 
-const cfg = () => ({
-  cloud: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '',
-  key: process.env.CLOUDINARY_API_KEY ?? '',
-  secret: process.env.CLOUDINARY_API_SECRET ?? '',
-});
+/** Accepts the three separate variables, or the single CLOUDINARY_URL=cloudinary://KEY:SECRET@CLOUD that Cloudinary shows. */
+export const cfg = () => {
+  const e = process.env;
+  let cloud = (e.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || e.CLOUDINARY_CLOUD_NAME || '').trim();
+  let key = (e.CLOUDINARY_API_KEY || '').trim();
+  let secret = (e.CLOUDINARY_API_SECRET || '').trim();
+  const m = /^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/.exec((e.CLOUDINARY_URL || '').trim());
+  if (m) { key = key || m[1]; secret = secret || m[2]; cloud = cloud || m[3]; }
+  return { cloud, key, secret };
+};
 
 const sign = (params: Record<string, string | number>) => {
   const str = Object.keys(params).sort().map((k) => `${k}=${params[k]}`).join('&');
