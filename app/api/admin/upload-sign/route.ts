@@ -1,11 +1,13 @@
 import { handle, requireAdmin } from '@/lib/auth';
-import { signUpload } from '@/lib/cloudinary';
+import { cfg, signUpload } from '@/lib/cloudinary';
 
 export const runtime = 'nodejs';
 
 export const POST = handle(async (req) => {
   await requireAdmin(req);
+  const c = cfg();
+  const missing = [!c.cloud && 'NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME', !c.key && 'CLOUDINARY_API_KEY', !c.secret && 'CLOUDINARY_API_SECRET'].filter(Boolean);
+  if (missing.length) return Response.json({ error: `Cloudinary is missing: ${missing.join(', ')}. Add them in .env.local / Vercel, then restart or redeploy.` }, { status: 500 });
   const p = signUpload('portfolio');
-  if (!p.cloudName || !p.apiKey) return Response.json({ error: 'Cloudinary env vars are not set.' }, { status: 500 });
   return Response.json(p);
 });
